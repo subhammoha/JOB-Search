@@ -8,7 +8,7 @@ export default function HomePage() {
       <div className="text-center mb-10 max-w-2xl">
         <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-full text-sm font-medium mb-6">
           <Briefcase className="w-4 h-4" />
-          Aggregates Jobs From Everywhere and Show at One Place; more
+          Aggregates Jobs From Everywhere and Show at One Place
         </div>
         <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 leading-tight mb-4">
           Find your next job,<br />
