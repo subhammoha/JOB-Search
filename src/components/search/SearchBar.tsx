@@ -34,7 +34,7 @@ export function SearchBar({ defaultQuery = '', defaultLocation = '', compact = f
           type="text"
           value={query}
           onChange={e => setQuery(e.target.value)}
-          placeholder='Job title, skills, or keywords e.g. "React developer"'
+          placeholder='Job title, skills, or keywords e.g. "Salesforce developer"'
           className="w-full pl-9 pr-4 py-3 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none text-sm bg-white"
           required
           minLength={2}
