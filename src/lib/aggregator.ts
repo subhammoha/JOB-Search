@@ -1,17 +1,30 @@
-import { UnifiedJob, SearchParams } from '@/types/job';
+import { UnifiedJob, SearchParams, JobSource, DIRECT_ATS_SOURCES } from '@/types/job';
 import { fetchArbeitnow } from './api-clients/arbeitnow';
 import { fetchRemotive } from './api-clients/remotive';
 import { fetchAdzuna } from './api-clients/adzuna';
 import { fetchTheMuse } from './api-clients/themuse';
 import { fetchJSearch } from './api-clients/jsearch';
-import { deduplicateJobKey } from './utils';
+import { fetchGreenhouse } from './api-clients/greenhouse';
+import { fetchLever } from './api-clients/lever';
+import { fetchAshby } from './api-clients/ashby';
+import { fetchWorkday } from './api-clients/workday';
 import { getEnabledSources } from './constants';
+import stringSimilarity from 'string-similarity';
+import atsCompanies from '@/data/ats-companies.json';
 
 export interface AggregationResult {
   jobs: UnifiedJob[];
   failedSources: string[];
   successfulSources: string[];
+  rateLimitWarning: boolean;
 }
+
+const ats = atsCompanies as {
+  greenhouse: string[];
+  lever: string[];
+  ashby: string[];
+  workday: string[];
+};
 
 export async function aggregateJobs(params: SearchParams): Promise<AggregationResult> {
   const { q, location, page = 1 } = params;
@@ -25,6 +38,10 @@ export async function aggregateJobs(params: SearchParams): Promise<AggregationRe
     adzuna: () => fetchAdzuna(q, location, page),
     themuse: () => fetchTheMuse(q),
     jsearch: () => fetchJSearch(q, location, page),
+    greenhouse: () => fetchGreenhouse(q, ats.greenhouse),
+    lever: () => fetchLever(q, ats.lever),
+    ashby: () => fetchAshby(q, ats.ashby),
+    workday: () => fetchWorkday(q, ats.workday),
   };
 
   const activeFetchers = Object.entries(sourceFetchers)
@@ -37,11 +54,17 @@ export async function aggregateJobs(params: SearchParams): Promise<AggregationRe
   const failedSources: string[] = [];
   const successfulSources: string[] = [];
   const allJobs: UnifiedJob[] = [];
+  let rateLimitWarning = false;
 
   results.forEach((result, i) => {
     const sourceName = activeFetchers[i][0];
     if (result.status === 'fulfilled') {
-      successfulSources.push(sourceName);
+      // Check if JSearch returned empty due to rate limit
+      if (sourceName === 'jsearch' && result.value.length === 0) {
+        rateLimitWarning = true;
+      } else {
+        successfulSources.push(sourceName);
+      }
       allJobs.push(...result.value);
     } else {
       failedSources.push(sourceName);
@@ -51,30 +74,58 @@ export async function aggregateJobs(params: SearchParams): Promise<AggregationRe
 
   const jobs = deduplicateJobs(allJobs);
 
-  return { jobs, failedSources, successfulSources };
+  return { jobs, failedSources, successfulSources, rateLimitWarning };
+}
+
+function normalizeTitle(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/\b(senior|sr\.?|junior|jr\.?|lead|staff|principal|remote|hybrid|mid|associate|entry.level)\b/g, '')
+    .replace(/[^a-z0-9\s]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 function deduplicateJobs(jobs: UnifiedJob[]): UnifiedJob[] {
-  const seen = new Map<string, UnifiedJob>();
+  const kept: UnifiedJob[] = [];
 
   for (const job of jobs) {
-    const key = deduplicateJobKey(job.title, job.company, job.location);
-    if (!seen.has(key)) {
-      seen.set(key, job);
+    const normalizedTitle = normalizeTitle(job.title);
+    const companyLower = job.company.toLowerCase();
+
+    const existingIdx = kept.findIndex(existing =>
+      existing.company.toLowerCase() === companyLower &&
+      stringSimilarity.compareTwoStrings(
+        normalizeTitle(existing.title),
+        normalizedTitle
+      ) >= 0.8
+    );
+
+    if (existingIdx === -1) {
+      // No duplicate — add it
+      kept.push(job);
     } else {
-      // Keep the one with more data (applicant count, salary, etc.)
-      const existing = seen.get(key)!;
-      if (
-        (!existing.applicantCount && job.applicantCount) ||
-        (!existing.salary && job.salary)
-      ) {
-        seen.set(key, { ...existing, ...job, id: existing.id });
+      // Duplicate found — prefer direct ATS source over job board
+      const existing = kept[existingIdx];
+      const jobIsDirect = DIRECT_ATS_SOURCES.includes(job.source);
+      const existingIsDirect = DIRECT_ATS_SOURCES.includes(existing.source);
+
+      if (jobIsDirect && !existingIsDirect) {
+        // Replace job board version with direct ATS version (better apply link)
+        kept[existingIdx] = {
+          ...existing,
+          applyUrl: job.applyUrl,
+          source: job.source,
+          // Keep applicantCount from job board if available
+          applicantCount: existing.applicantCount ?? job.applicantCount,
+          // Keep salary if job board had it
+          salary: existing.salary ?? job.salary,
+        };
       }
+      // If existing is already direct ATS or job has more data, keep existing
     }
   }
 
   // Sort by most recently posted
-  return Array.from(seen.values()).sort(
-    (a, b) => b.postedAt.getTime() - a.postedAt.getTime()
-  );
+  return kept.sort((a, b) => b.postedAt.getTime() - a.postedAt.getTime());
 }

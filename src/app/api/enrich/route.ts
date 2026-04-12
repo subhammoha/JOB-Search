@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { checkH1BSponsor } from '@/lib/enrichment/h1b-checker';
 import { detectConsultancy } from '@/lib/enrichment/consultancy-detector';
+import { fetchLevelsData } from '@/lib/enrichment/levels-checker';
 import { enrichmentCache } from '@/lib/cache';
 import { EnrichmentMap } from '@/types/enrich';
 
@@ -32,12 +33,13 @@ export async function POST(req: NextRequest) {
         return;
       }
 
-      const [h1b, consultancy] = await Promise.all([
+      const [h1b, consultancy, levels] = await Promise.all([
         checkH1BSponsor(name),
         Promise.resolve(detectConsultancy(name, description)),
+        fetchLevelsData(name),
       ]);
 
-      const enrichment = { h1b, consultancy };
+      const enrichment = { h1b, consultancy, levels };
       enrichmentCache.set(cacheKey, enrichment);
       result[name] = enrichment;
     })

@@ -1,4 +1,15 @@
-export type JobSource = 'jsearch' | 'adzuna' | 'themuse' | 'arbeitnow' | 'remotive';
+export type JobSource =
+  | 'jsearch'
+  | 'adzuna'
+  | 'themuse'
+  | 'arbeitnow'
+  | 'remotive'
+  | 'greenhouse'
+  | 'lever'
+  | 'ashby'
+  | 'workday';
+
+export const DIRECT_ATS_SOURCES: JobSource[] = ['greenhouse', 'lever', 'ashby', 'workday'];
 
 export interface UnifiedJob {
   id: string;

@@ -1,0 +1,62 @@
+{
+  "greenhouse": [
+    "airbnb", "dropbox", "squarespace", "figma", "notion", "canva",
+    "robinhood", "brex", "rippling", "gusto", "lattice", "airtable",
+    "asana", "hubspot", "zendesk", "twilio", "sendgrid", "segment",
+    "benchling", "carta", "chime", "affirm", "plaid", "blend",
+    "oportun", "opendoor", "compass", "offerpad", "divvy-homes",
+    "nerdwallet", "credible", "earnin", "dave", "sofi",
+    "duolingo", "coursera", "chegg", "instructure", "2u",
+    "doordash", "instacart", "grubhub", "postmates", "gopuff",
+    "lyft", "bird", "lime", "spin", "tier",
+    "peloton", "mirror", "tonal", "whoop", "oura",
+    "warby-parker", "glossier", "allbirds", "reformation", "everlane",
+    "wayfair", "overstock", "wish", "poshmark", "thredup",
+    "mongodb", "snowflake", "databricks", "dbt-labs", "fivetran",
+    "amplitude", "mixpanel", "heap", "fullstory", "hotjar",
+    "pagerduty", "datadog", "newrelic", "dynatrace", "splunk",
+    "cloudflare", "fastly", "akamai", "zscaler", "crowdstrike",
+    "okta", "auth0", "sailpoint", "cyberark", "varonis"
+  ],
+  "lever": [
+    "netflix", "shopify", "stripe", "coinbase", "github",
+    "slack", "intercom", "zendesk", "freshworks", "drift",
+    "scale-ai", "weights-biases", "huggingface", "cohere", "anthropic",
+    "openai", "stability-ai", "midjourney", "runway", "synthesis",
+    "figma", "canva", "sketch", "invision", "abstract",
+    "vercel", "netlify", "render", "railway", "fly",
+    "hashicorp", "pulumi", "chef", "puppet", "ansible",
+    "elastic", "grafana", "prometheus", "vector", "loki",
+    "contentful", "sanity", "strapi", "prismic", "storyblok",
+    "retool", "bubble", "webflow", "framer", "plasmic",
+    "linear", "height", "shortcut", "jira", "clickup",
+    "loom", "mmhmm", "descript", "otter", "fireflies",
+    "deel", "remote", "papaya-global", "multiplier", "oyster",
+    "calendly", "doodle", "x-team", "toptal", "andela"
+  ],
+  "ashby": [
+    "linear", "retool", "brex", "mercury", "ramp",
+    "watershed", "arcadia", "climate-draft", "pachama", "rubicon",
+    "notion", "craft", "coda", "rows", "grid",
+    "loom", "grain", "claap", "rewatch", "tella",
+    "height", "plane", "basecamp", "twist", "nozbe",
+    "beehiiv", "ghost", "substack", "revue", "buttondown",
+    "raycast", "alfred", "hookmark", "popclip", "keystroke-pro",
+    "fig", "warp", "iterm2", "hyper", "tabby",
+    "posthog", "june", "clearbit", "hull", "census",
+    "inngest", "trigger", "windmill", "prefect", "dagster",
+    "drifting-in-space", "fly", "railway", "cyclic", "northflank",
+    "turso", "neon", "planetscale", "supabase", "xata"
+  ],
+  "workday": [
+    "amazon", "google", "microsoft", "apple", "meta",
+    "salesforce", "oracle", "adobe", "servicenow", "workday",
+    "uber", "lyft", "airbnb", "linkedin", "twitter",
+    "intel", "amd", "nvidia", "qualcomm", "broadcom",
+    "cisco", "juniper", "arista", "palo-alto-networks", "fortinet",
+    "ibm", "hpe", "dell", "emc", "vmware",
+    "sap", "siemens", "bosch", "basf", "bayer",
+    "jpmorgan", "goldman-sachs", "morgan-stanley", "citigroup", "bofa",
+    "mckinsey", "bcg", "bain", "kpmg", "pwc"
+  ]
+}

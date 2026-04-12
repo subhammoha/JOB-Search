@@ -8,6 +8,7 @@ import { SourceBadge } from './SourceBadge';
 import { ApplicantBadge } from './ApplicantBadge';
 import { H1BSponsorBadge } from './H1BSponsorBadge';
 import { ConsultancyBadge } from './ConsultancyBadge';
+import { CompanyRatingBadge } from './CompanyRatingBadge';
 
 interface JobCardProps {
   job: UnifiedJob;
@@ -42,7 +43,7 @@ export function JobCard({ job, enrichment, enrichmentLoading, isBookmarked, onBo
         </div>
       </div>
 
-      {/* Title */}
+      {/* Title + company + location */}
       <div>
         <h3 className="text-base font-semibold text-gray-900 leading-snug">
           {job.title}
@@ -85,6 +86,12 @@ export function JobCard({ job, enrichment, enrichmentLoading, isBookmarked, onBo
           <ApplicantBadge count={job.applicantCount} />
         )}
       </div>
+
+      {/* Company reviews + comp data */}
+      <CompanyRatingBadge
+        company={job.company}
+        levels={enrichment?.levels}
+      />
 
       {/* Description */}
       <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">

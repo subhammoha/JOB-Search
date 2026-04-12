@@ -7,6 +7,10 @@ const SOURCE_LABELS: Record<JobSource, string> = {
   themuse: 'The Muse',
   arbeitnow: 'Arbeitnow',
   remotive: 'Remotive',
+  greenhouse: 'Greenhouse',
+  lever: 'Lever',
+  ashby: 'Ashby',
+  workday: 'Workday',
 };
 
 const SOURCE_COLORS: Record<JobSource, string> = {
@@ -15,6 +19,10 @@ const SOURCE_COLORS: Record<JobSource, string> = {
   themuse: 'bg-purple-50 text-purple-700 border-purple-200',
   arbeitnow: 'bg-green-50 text-green-700 border-green-200',
   remotive: 'bg-teal-50 text-teal-700 border-teal-200',
+  greenhouse: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  lever: 'bg-rose-50 text-rose-700 border-rose-200',
+  ashby: 'bg-indigo-50 text-indigo-700 border-indigo-200',
+  workday: 'bg-sky-50 text-sky-700 border-sky-200',
 };
 
 export function SourceBadge({ source, className }: { source: JobSource; className?: string }) {

@@ -3,12 +3,16 @@
 import { FilterState, JobSource } from '@/types/job';
 import { SlidersHorizontal } from 'lucide-react';
 
-const ALL_SOURCES: { id: JobSource; label: string }[] = [
+const ALL_SOURCES: { id: JobSource; label: string; direct?: boolean }[] = [
   { id: 'jsearch', label: 'Indeed/LinkedIn' },
   { id: 'adzuna', label: 'Adzuna' },
   { id: 'themuse', label: 'The Muse' },
   { id: 'arbeitnow', label: 'Arbeitnow' },
   { id: 'remotive', label: 'Remotive' },
+  { id: 'greenhouse', label: 'Greenhouse', direct: true },
+  { id: 'lever', label: 'Lever', direct: true },
+  { id: 'ashby', label: 'Ashby', direct: true },
+  { id: 'workday', label: 'Workday', direct: true },
 ];
 
 interface SearchFiltersProps {
@@ -41,9 +45,23 @@ export function SearchFilters({ filters, onChange, totalJobs, filteredJobs }: Se
 
       {/* Source filter */}
       <div>
-        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Sources</p>
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Job Boards</p>
+        <div className="space-y-1.5 mb-3">
+          {ALL_SOURCES.filter(s => !s.direct).map(({ id, label }) => (
+            <label key={id} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={filters.sources.includes(id)}
+                onChange={() => toggleSource(id)}
+                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700">{label}</span>
+            </label>
+          ))}
+        </div>
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Direct ATS</p>
         <div className="space-y-1.5">
-          {ALL_SOURCES.map(({ id, label }) => (
+          {ALL_SOURCES.filter(s => s.direct).map(({ id, label }) => (
             <label key={id} className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"

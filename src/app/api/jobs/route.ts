@@ -53,6 +53,7 @@ export async function GET(req: NextRequest) {
         total: result.jobs.length,
         failedSources: result.failedSources,
         successfulSources: result.successfulSources,
+        rateLimitWarning: result.rateLimitWarning,
       },
     });
   } catch (err) {

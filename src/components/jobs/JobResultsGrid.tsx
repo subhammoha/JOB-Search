@@ -17,10 +17,14 @@ interface JobsApiResponse {
     total: number;
     failedSources: string[];
     successfulSources: string[];
+    rateLimitWarning: boolean;
   };
 }
 
-const ALL_SOURCES: JobSource[] = ['jsearch', 'adzuna', 'themuse', 'arbeitnow', 'remotive'];
+const ALL_SOURCES: JobSource[] = [
+  'jsearch', 'adzuna', 'themuse', 'arbeitnow', 'remotive',
+  'greenhouse', 'lever', 'ashby', 'workday',
+];
 
 const DEFAULT_FILTERS: FilterState = {
   sources: ALL_SOURCES,
@@ -160,6 +164,7 @@ export function JobResultsGrid({ q, location }: Props) {
   }
 
   const failedSources = data?.meta?.failedSources ?? [];
+  const rateLimitWarning = data?.meta?.rateLimitWarning ?? false;
 
   return (
     <div className="flex flex-col lg:flex-row gap-8">
@@ -177,6 +182,14 @@ export function JobResultsGrid({ q, location }: Props) {
 
       {/* Results */}
       <div className="flex-1 min-w-0">
+        {/* JSearch rate limit warning */}
+        {rateLimitWarning && (
+          <div className="mb-3 px-4 py-2.5 bg-orange-50 border border-orange-200 rounded-lg text-sm text-orange-800 flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            JSearch monthly quota is nearly exhausted. LinkedIn/Indeed results may be limited. Direct ATS sources (Greenhouse, Lever, etc.) still fully active.
+          </div>
+        )}
+
         {/* Failed sources warning */}
         {failedSources.length > 0 && (
           <div className="mb-4 px-4 py-2.5 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-800 flex items-center gap-2">
