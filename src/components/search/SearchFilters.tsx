@@ -12,7 +12,6 @@ const ALL_SOURCES: { id: JobSource; label: string; direct?: boolean }[] = [
   { id: 'greenhouse', label: 'Greenhouse', direct: true },
   { id: 'lever', label: 'Lever', direct: true },
   { id: 'ashby', label: 'Ashby', direct: true },
-  { id: 'workday', label: 'Workday', direct: true },
 ];
 
 interface SearchFiltersProps {

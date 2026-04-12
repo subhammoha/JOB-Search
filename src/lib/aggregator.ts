@@ -1,16 +1,11 @@
-import { UnifiedJob, SearchParams, JobSource, DIRECT_ATS_SOURCES } from '@/types/job';
+import { UnifiedJob, SearchParams, DIRECT_ATS_SOURCES } from '@/types/job';
 import { fetchArbeitnow } from './api-clients/arbeitnow';
 import { fetchRemotive } from './api-clients/remotive';
 import { fetchAdzuna } from './api-clients/adzuna';
 import { fetchTheMuse } from './api-clients/themuse';
 import { fetchJSearch } from './api-clients/jsearch';
-import { fetchGreenhouse } from './api-clients/greenhouse';
-import { fetchLever } from './api-clients/lever';
-import { fetchAshby } from './api-clients/ashby';
-import { fetchWorkday } from './api-clients/workday';
 import { getEnabledSources } from './constants';
 import stringSimilarity from 'string-similarity';
-import atsCompanies from '@/data/ats-companies.json';
 
 export interface AggregationResult {
   jobs: UnifiedJob[];
@@ -19,29 +14,20 @@ export interface AggregationResult {
   rateLimitWarning: boolean;
 }
 
-const ats = atsCompanies as {
-  greenhouse: string[];
-  lever: string[];
-  ashby: string[];
-  workday: string[];
-};
-
 export async function aggregateJobs(params: SearchParams): Promise<AggregationResult> {
   const { q, location, page = 1 } = params;
   const enabledSources = getEnabledSources();
 
   type Fetcher = () => Promise<UnifiedJob[]>;
 
+  // Greenhouse, Lever, and Ashby are fetched client-side via useATSJobs (browser fetch,
+  // no server timeout). Only API-key-required sources remain here.
   const sourceFetchers: Record<string, Fetcher> = {
     arbeitnow: () => fetchArbeitnow(q, location),
     remotive: () => fetchRemotive(q),
     adzuna: () => fetchAdzuna(q, location, page),
     themuse: () => fetchTheMuse(q),
     jsearch: () => fetchJSearch(q, location, page),
-    greenhouse: () => fetchGreenhouse(q, ats.greenhouse),
-    lever: () => fetchLever(q, ats.lever),
-    ashby: () => fetchAshby(q, ats.ashby),
-    workday: () => fetchWorkday(q, ats.workday),
   };
 
   const activeFetchers = Object.entries(sourceFetchers)

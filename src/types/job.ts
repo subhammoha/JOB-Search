@@ -6,10 +6,9 @@ export type JobSource =
   | 'remotive'
   | 'greenhouse'
   | 'lever'
-  | 'ashby'
-  | 'workday';
+  | 'ashby';
 
-export const DIRECT_ATS_SOURCES: JobSource[] = ['greenhouse', 'lever', 'ashby', 'workday'];
+export const DIRECT_ATS_SOURCES: JobSource[] = ['greenhouse', 'lever', 'ashby'];
 
 export interface UnifiedJob {
   id: string;
