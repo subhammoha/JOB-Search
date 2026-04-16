@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { SearchBar } from '@/components/search/SearchBar';
+import { SaveSearchButton } from '@/components/search/SaveSearchButton';
 import { JobResultsGrid } from '@/components/jobs/JobResultsGrid';
 
 interface SearchPageProps {
@@ -14,9 +15,12 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      {/* Compact search bar at top */}
-      <div className="mb-8">
-        <SearchBar defaultQuery={q} defaultLocation={location} compact />
+      {/* Compact search bar at top + save button */}
+      <div className="mb-8 flex items-start gap-2">
+        <div className="flex-1">
+          <SearchBar defaultQuery={q} defaultLocation={location} compact />
+        </div>
+        <SaveSearchButton q={q.trim()} location={location?.trim()} />
       </div>
 
       <Suspense fallback={null}>

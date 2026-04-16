@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Briefcase, Bookmark } from 'lucide-react';
+import { Briefcase, ClipboardList, User } from 'lucide-react';
 
 export function Header() {
   return (
@@ -11,11 +11,18 @@ export function Header() {
         </Link>
         <nav className="flex items-center gap-4">
           <Link
-            href="/bookmarks"
+            href="/pipeline"
             className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-blue-600 transition-colors"
           >
-            <Bookmark className="w-4 h-4" />
-            <span className="hidden sm:inline">Saved Jobs</span>
+            <ClipboardList className="w-4 h-4" />
+            <span className="hidden sm:inline">Pipeline</span>
+          </Link>
+          <Link
+            href="/profile"
+            className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-blue-600 transition-colors"
+          >
+            <User className="w-4 h-4" />
+            <span className="hidden sm:inline">Profile</span>
           </Link>
         </nav>
       </div>

@@ -10,7 +10,7 @@ interface SearchBarProps {
   compact?: boolean;
 }
 
-export function SearchBar({ defaultQuery = '', defaultLocation = '', compact = false }: SearchBarProps) {
+export function SearchBar({ defaultQuery = '', defaultLocation = 'United States', compact = false }: SearchBarProps) {
   const [query, setQuery] = useState(defaultQuery);
   const [location, setLocation] = useState(defaultLocation);
   const router = useRouter();

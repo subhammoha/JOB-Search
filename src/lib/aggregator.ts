@@ -4,6 +4,7 @@ import { fetchRemotive } from './api-clients/remotive';
 import { fetchAdzuna } from './api-clients/adzuna';
 import { fetchTheMuse } from './api-clients/themuse';
 import { fetchJSearch } from './api-clients/jsearch';
+import { fetchRemoteOK } from './api-clients/remoteok';
 import { getEnabledSources } from './constants';
 import stringSimilarity from 'string-similarity';
 
@@ -25,6 +26,7 @@ export async function aggregateJobs(params: SearchParams): Promise<AggregationRe
   const sourceFetchers: Record<string, Fetcher> = {
     arbeitnow: () => fetchArbeitnow(q, location),
     remotive: () => fetchRemotive(q),
+    remoteok: () => fetchRemoteOK(q),
     adzuna: () => fetchAdzuna(q, location, page),
     themuse: () => fetchTheMuse(q),
     jsearch: () => fetchJSearch(q, location, page),

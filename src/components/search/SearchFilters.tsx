@@ -9,6 +9,7 @@ const ALL_SOURCES: { id: JobSource; label: string; direct?: boolean }[] = [
   { id: 'themuse', label: 'The Muse' },
   { id: 'arbeitnow', label: 'Arbeitnow' },
   { id: 'remotive', label: 'Remotive' },
+  { id: 'remoteok', label: 'RemoteOK' },
   { id: 'greenhouse', label: 'Greenhouse', direct: true },
   { id: 'lever', label: 'Lever', direct: true },
   { id: 'ashby', label: 'Ashby', direct: true },

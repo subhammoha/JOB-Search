@@ -4,6 +4,7 @@ export type JobSource =
   | 'themuse'
   | 'arbeitnow'
   | 'remotive'
+  | 'remoteok'
   | 'greenhouse'
   | 'lever'
   | 'ashby';

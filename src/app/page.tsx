@@ -1,4 +1,5 @@
 import { SearchBar } from '@/components/search/SearchBar';
+import { SavedSearchChips } from '@/components/search/SavedSearchChips';
 import { Briefcase, ShieldCheck, AlertTriangle, Users } from 'lucide-react';
 
 export default function HomePage() {
@@ -21,12 +22,13 @@ export default function HomePage() {
       </div>
 
       {/* Search form */}
-      <div className="w-full max-w-3xl mb-12">
+      <div className="w-full max-w-3xl mb-4 flex flex-col items-center">
         <SearchBar />
+        <SavedSearchChips />
       </div>
 
       {/* Feature pills */}
-      <div className="flex flex-wrap justify-center gap-3 text-sm text-gray-600 max-w-xl">
+      <div className="flex flex-wrap justify-center gap-3 text-sm text-gray-600 max-w-xl mt-8">
         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 border border-green-200 rounded-full text-green-700">
           <ShieldCheck className="w-4 h-4" />
           H1B Visa Sponsorship

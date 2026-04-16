@@ -6,9 +6,12 @@ import { UnifiedJob, FilterState, JobSource, DIRECT_ATS_SOURCES } from '@/types/
 import { EnrichmentMap } from '@/types/enrich';
 import { JobCard } from './JobCard';
 import { JobCardSkeleton } from './JobCardSkeleton';
+import { JobDetailPanel } from './JobDetailPanel';
+import { CompanyResearchModal } from './CompanyResearchModal';
 import { SearchFilters } from '@/components/search/SearchFilters';
-import { useBookmarks } from '@/hooks/useBookmarks';
+import { usePipeline } from '@/hooks/usePipeline';
 import { useATSJobs } from '@/hooks/useATSJobs';
+import { useProfile } from '@/hooks/useProfile';
 import { AlertCircle, RefreshCw, SearchX, Loader2 } from 'lucide-react';
 import { HIGH_APPLICANT_THRESHOLD } from '@/lib/constants';
 
@@ -23,7 +26,7 @@ interface JobsApiResponse {
 }
 
 const ALL_SOURCES: JobSource[] = [
-  'jsearch', 'adzuna', 'themuse', 'arbeitnow', 'remotive',
+  'jsearch', 'adzuna', 'themuse', 'arbeitnow', 'remotive', 'remoteok',
   'greenhouse', 'lever', 'ashby',
 ];
 
@@ -78,12 +81,19 @@ function mergeAndDeduplicate(serverJobs: UnifiedJob[], atsJobs: UnifiedJob[]): U
 export function JobResultsGrid({ q, location }: Props) {
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [enrichmentMap, setEnrichmentMap] = useState<EnrichmentMap>({});
-  const { toggle, isBookmarked } = useBookmarks();
+  const [selectedJob, setSelectedJob] = useState<UnifiedJob | null>(null);
+  const [selectedCompany, setSelectedCompany] = useState<string | null>(null);
+  const [matchScores, setMatchScores] = useState<Record<string, { score: number; reason: string }>>({});
+  const { toggle, isInPipeline: isBookmarked } = usePipeline();
+  const { profile, hasProfile } = useProfile();
   const enrichedRef = useRef(new Set<string>());
+  const matchedRef = useRef(new Set<string>());
 
-  // Reset enrichment tracking whenever the search query changes
+  // Reset enrichment + match score tracking whenever the search query changes
   useEffect(() => {
     enrichedRef.current = new Set<string>();
+    matchedRef.current = new Set<string>();
+    setMatchScores({});
   }, [q]);
 
   // 1. Server-side sources: jsearch, adzuna, themuse, arbeitnow, remotive
@@ -154,7 +164,25 @@ export function JobResultsGrid({ q, location }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allJobs]);
 
-  // 5. Client-side filters
+  // 5. AI match scoring — fires after jobs load when user profile is configured
+  useEffect(() => {
+    if (!hasProfile || allJobs.length === 0) return;
+    const unmatched = allJobs.filter(j => !matchedRef.current.has(j.id)).slice(0, 30);
+    if (unmatched.length === 0) return;
+    unmatched.forEach(j => matchedRef.current.add(j.id));
+    fetch('/api/match', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ jobs: unmatched, profile }),
+    })
+      .then(res => res.ok ? res.json() : null)
+      .then(results => { if (results) setMatchScores(prev => ({ ...prev, ...results })); })
+      .catch(() => {});
+  // profile object identity changes on every render from useProfile; stringify to stabilize
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allJobs, hasProfile]);
+
+  // Client-side filters
   const filteredJobs = useMemo(() => {
     return allJobs.filter(job => {
       if (!filters.sources.includes(job.source)) return false;
@@ -295,10 +323,22 @@ export function JobResultsGrid({ q, location }: Props) {
               enrichmentLoading={enrichMutation.isPending && !enrichmentMap[job.company]}
               isBookmarked={isBookmarked(job.id)}
               onBookmarkToggle={toggle}
+              onSelect={setSelectedJob}
+              onCompanyClick={setSelectedCompany}
+              matchScore={matchScores[job.id]?.score}
+              matchReason={matchScores[job.id]?.reason}
             />
           ))}
         </div>
       </div>
+
+      {/* Job detail slide-out panel */}
+      <JobDetailPanel job={selectedJob} onClose={() => setSelectedJob(null)} />
+
+      {/* Company research modal */}
+      {selectedCompany && (
+        <CompanyResearchModal company={selectedCompany} onClose={() => setSelectedCompany(null)} />
+      )}
     </div>
   );
 }
