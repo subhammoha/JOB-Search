@@ -9,6 +9,7 @@ import { ApplicantBadge } from './ApplicantBadge';
 import { H1BSponsorBadge } from './H1BSponsorBadge';
 import { ConsultancyBadge } from './ConsultancyBadge';
 import { CompanyRatingBadge } from './CompanyRatingBadge';
+import { MatchScoreBadge } from './MatchScoreBadge';
 
 interface JobCardProps {
   job: UnifiedJob;
@@ -16,9 +17,13 @@ interface JobCardProps {
   enrichmentLoading?: boolean;
   isBookmarked: boolean;
   onBookmarkToggle: (job: UnifiedJob) => void;
+  onSelect?: (job: UnifiedJob) => void;
+  onCompanyClick?: (company: string) => void;
+  matchScore?: number;
+  matchReason?: string;
 }
 
-export function JobCard({ job, enrichment, enrichmentLoading, isBookmarked, onBookmarkToggle }: JobCardProps) {
+export function JobCard({ job, enrichment, enrichmentLoading, isBookmarked, onBookmarkToggle, onSelect, onCompanyClick, matchScore, matchReason }: JobCardProps) {
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow flex flex-col gap-3">
       {/* Top row: source + date + bookmark */}
@@ -45,11 +50,17 @@ export function JobCard({ job, enrichment, enrichmentLoading, isBookmarked, onBo
 
       {/* Title + company + location */}
       <div>
-        <h3 className="text-base font-semibold text-gray-900 leading-snug">
+        <h3
+          className={cn('text-base font-semibold text-gray-900 leading-snug', onSelect && 'cursor-pointer hover:text-blue-600 transition-colors')}
+          onClick={() => onSelect?.(job)}
+        >
           {job.title}
         </h3>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-sm text-gray-500">
-          <span className="font-medium text-gray-700">{job.company}</span>
+          <span
+            className={cn('font-medium text-gray-700', onCompanyClick && 'cursor-pointer hover:text-blue-600 transition-colors')}
+            onClick={() => onCompanyClick?.(job.company)}
+          >{job.company}</span>
           <span className="flex items-center gap-1">
             <MapPin className="w-3 h-3" />
             {job.location}
@@ -76,6 +87,7 @@ export function JobCard({ job, enrichment, enrichmentLoading, isBookmarked, onBo
             <H1BSponsorBadge h1b={enrichment.h1b} />
             <ConsultancyBadge consultancy={enrichment.consultancy} />
             <ApplicantBadge count={job.applicantCount} />
+            {matchScore !== undefined && <MatchScoreBadge score={matchScore} reason={matchReason} />}
           </>
         ) : enrichmentLoading ? (
           <>
@@ -83,7 +95,10 @@ export function JobCard({ job, enrichment, enrichmentLoading, isBookmarked, onBo
             <div className="h-5 bg-gray-100 rounded w-20 animate-pulse" />
           </>
         ) : (
-          <ApplicantBadge count={job.applicantCount} />
+          <>
+            <ApplicantBadge count={job.applicantCount} />
+            {matchScore !== undefined && <MatchScoreBadge score={matchScore} reason={matchReason} />}
+          </>
         )}
       </div>
 

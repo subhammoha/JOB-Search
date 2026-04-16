@@ -117,6 +117,6 @@ export const STAFFING_DESCRIPTION_PHRASES = [
 // Enabled sources via env (comma-separated), default to all if not set
 export function getEnabledSources(): string[] {
   const env = process.env.ENABLED_SOURCES;
-  if (!env) return ['arbeitnow', 'remotive', 'adzuna', 'themuse', 'jsearch'];
+  if (!env) return ['arbeitnow', 'remotive', 'remoteok', 'adzuna', 'themuse', 'jsearch'];
   return env.split(',').map(s => s.trim().toLowerCase());
 }
