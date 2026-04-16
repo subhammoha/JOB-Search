@@ -8,14 +8,14 @@ export default function HomePage() {
       <div className="text-center mb-10 max-w-2xl">
         <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-full text-sm font-medium mb-6">
           <Briefcase className="w-4 h-4" />
-          Aggregates LinkedIn, Indeed, Glassdoor, Adzuna &amp; more
+          Aggregates Jobs From Everywhere and Show at One Place
         </div>
         <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 leading-tight mb-4">
           Find your next job,<br />
           <span className="text-blue-600">smarter.</span>
         </h1>
         <p className="text-lg text-gray-500 leading-relaxed">
-          Search across all major job boards at once. Instantly flag H1B sponsors,
+          Search across all major job boards at once. Instantly flag H1B sponsors(If Data Is Avalible,
           avoid staffing agencies, and spot high-competition listings — all in one place.
         </p>
       </div>
@@ -45,7 +45,7 @@ export default function HomePage() {
       <div className="mt-10 text-center">
         <p className="text-xs text-gray-400 mb-3">Try searching for</p>
         <div className="flex flex-wrap justify-center gap-2">
-          {['React Developer', 'Data Engineer', 'Product Manager', 'DevOps Engineer', 'Machine Learning Engineer'].map(term => (
+          {['Salesforce Administrator', 'Salesforce Developer', 'Salesforce Architect', 'Salesforce Solution Architect', 'Salesforce Technical Architect', 'Salesforce Consultant', 'Salesforce Business Analyst', 'Salesforce Project Manager', 'Salesforce Product Manager', 'Salesforce Manager', 'Salesforce Release Manager', 'Salesforce Delivery Manager', 'Salesforce Practice Lead', 'Salesforce Data Engineer', 'Salesforce QA Engineer', 'Salesforce QA Tester', 'Salesforce QA Automation Engineer', 'Salesforce Test Lead'].map(term => (
             <a
               key={term}
               href={`/search?q=${encodeURIComponent(term)}`}
