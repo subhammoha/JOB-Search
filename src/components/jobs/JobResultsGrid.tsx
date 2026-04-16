@@ -108,8 +108,10 @@ export function JobResultsGrid({ q, location }: Props) {
   }, [data]);
 
   // 2. Browser-side ATS sources: greenhouse, lever, ashby — fires after server responds
+  // Passes serverJobs so the hook can auto-discover additional company slugs from apply URLs
   const { jobs: atsJobs, isLoading: atsLoading, pendingCount, totalCount } = useATSJobs(
     q,
+    serverJobs,
     !isLoading && !isError && !!data,
   );
 

@@ -25,35 +25,39 @@ interface GreenhouseResponse {
 const GREENHOUSE_BASE = 'https://boards-api.greenhouse.io/v1/boards';
 
 export async function fetchGreenhouseCompany(boardToken: string, query: string): Promise<UnifiedJob[]> {
-  const res = await fetch(
-    `${GREENHOUSE_BASE}/${encodeURIComponent(boardToken)}/jobs?content=true`,
-    {
-      headers: { Accept: 'application/json' },
-      signal: AbortSignal.timeout(8000),
-    }
-  );
+  try {
+    const res = await fetch(
+      `${GREENHOUSE_BASE}/${encodeURIComponent(boardToken)}/jobs?content=true`,
+      {
+        headers: { Accept: 'application/json' },
+        signal: AbortSignal.timeout(8000),
+      }
+    );
 
-  if (!res.ok) return [];
+    if (!res.ok) return [];
 
-  const data: GreenhouseResponse = await res.json();
-  const queryLower = query.toLowerCase();
+    const data: GreenhouseResponse = await res.json();
+    const queryLower = query.toLowerCase();
 
-  return data.jobs
-    .filter(job =>
-      job.title.toLowerCase().includes(queryLower) ||
-      (job.content ?? '').toLowerCase().includes(queryLower)
-    )
-    .map(job => ({
-      id: generateJobId(job.title, boardToken, job.location.name, 'greenhouse'),
-      title: job.title,
-      company: boardToken.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
-      location: job.location.name || 'Not specified',
-      description: (job.content ?? '').replace(/<[^>]+>/g, '').slice(0, 500),
-      applyUrl: job.absolute_url,
-      postedAt: new Date(job.updated_at),
-      source: 'greenhouse' as const,
-      isRemote: job.location.name.toLowerCase().includes('remote'),
-    }));
+    return data.jobs
+      .filter(job =>
+        job.title.toLowerCase().includes(queryLower) ||
+        (job.content ?? '').toLowerCase().includes(queryLower)
+      )
+      .map(job => ({
+        id: generateJobId(job.title, boardToken, job.location.name, 'greenhouse'),
+        title: job.title,
+        company: boardToken.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+        location: job.location.name || 'Not specified',
+        description: (job.content ?? '').replace(/<[^>]+>/g, '').slice(0, 500),
+        applyUrl: job.absolute_url,
+        postedAt: new Date(job.updated_at),
+        source: 'greenhouse' as const,
+        isRemote: job.location.name.toLowerCase().includes('remote'),
+      }));
+  } catch {
+    return [];
+  }
 }
 
 // ─── Lever ────────────────────────────────────────────────────────────────────
@@ -76,45 +80,49 @@ interface LeverPosting {
 const LEVER_BASE = 'https://api.lever.co/v0/postings';
 
 export async function fetchLeverCompany(org: string, query: string): Promise<UnifiedJob[]> {
-  const res = await fetch(
-    `${LEVER_BASE}/${encodeURIComponent(org)}?mode=json`,
-    {
-      headers: { Accept: 'application/json' },
-      signal: AbortSignal.timeout(8000),
-    }
-  );
+  try {
+    const res = await fetch(
+      `${LEVER_BASE}/${encodeURIComponent(org)}?mode=json`,
+      {
+        headers: { Accept: 'application/json' },
+        signal: AbortSignal.timeout(8000),
+      }
+    );
 
-  if (!res.ok) return [];
+    if (!res.ok) return [];
 
-  const data: LeverPosting[] = await res.json();
-  const queryLower = query.toLowerCase();
-  const companyName = org.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    const data: LeverPosting[] = await res.json();
+    const queryLower = query.toLowerCase();
+    const companyName = org.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 
-  return data
-    .filter(job =>
-      job.text.toLowerCase().includes(queryLower) ||
-      job.descriptionPlain.toLowerCase().includes(queryLower)
-    )
-    .map(job => {
-      const location = job.categories.location || 'Not specified';
-      const isRemote =
-        location.toLowerCase().includes('remote') ||
-        job.workplaceType === 'remote' ||
-        job.categories.workplaceType === 'remote';
+    return data
+      .filter(job =>
+        job.text.toLowerCase().includes(queryLower) ||
+        job.descriptionPlain.toLowerCase().includes(queryLower)
+      )
+      .map(job => {
+        const location = job.categories.location || 'Not specified';
+        const isRemote =
+          location.toLowerCase().includes('remote') ||
+          job.workplaceType === 'remote' ||
+          job.categories.workplaceType === 'remote';
 
-      return {
-        id: generateJobId(job.text, org, location, 'lever'),
-        title: job.text,
-        company: companyName,
-        location,
-        description: job.descriptionPlain.slice(0, 500),
-        applyUrl: job.hostedUrl,
-        postedAt: new Date(job.createdAt),
-        source: 'lever' as const,
-        isRemote,
-        employmentType: job.categories.commitment,
-      };
-    });
+        return {
+          id: generateJobId(job.text, org, location, 'lever'),
+          title: job.text,
+          company: companyName,
+          location,
+          description: job.descriptionPlain.slice(0, 500),
+          applyUrl: job.hostedUrl,
+          postedAt: new Date(job.createdAt),
+          source: 'lever' as const,
+          isRemote,
+          employmentType: job.categories.commitment,
+        };
+      });
+  } catch {
+    return [];
+  }
 }
 
 // ─── Ashby ────────────────────────────────────────────────────────────────────
@@ -152,39 +160,43 @@ query JobPostings($organizationHostedJobsPageName: String!) {
 `;
 
 export async function fetchAshbyCompany(orgSlug: string, query: string): Promise<UnifiedJob[]> {
-  const res = await fetch(ASHBY_GRAPHQL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-    body: JSON.stringify({
-      operationName: 'JobPostings',
-      query: ASHBY_QUERY,
-      variables: { organizationHostedJobsPageName: orgSlug },
-    }),
-    signal: AbortSignal.timeout(8000),
-  });
+  try {
+    const res = await fetch(ASHBY_GRAPHQL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({
+        operationName: 'JobPostings',
+        query: ASHBY_QUERY,
+        variables: { organizationHostedJobsPageName: orgSlug },
+      }),
+      signal: AbortSignal.timeout(8000),
+    });
 
-  if (!res.ok) return [];
+    if (!res.ok) return [];
 
-  const json = await res.json();
-  const postings: AshbyJob[] = json?.data?.jobBoard?.jobPostings ?? [];
-  const queryLower = query.toLowerCase();
-  const companyName = orgSlug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    const json = await res.json();
+    const postings: AshbyJob[] = json?.data?.jobBoard?.jobPostings ?? [];
+    const queryLower = query.toLowerCase();
+    const companyName = orgSlug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 
-  return postings
-    .filter(job =>
-      job.title.toLowerCase().includes(queryLower) ||
-      (job.descriptionHtml ?? '').toLowerCase().includes(queryLower)
-    )
-    .map(job => ({
-      id: generateJobId(job.title, orgSlug, job.locationName ?? 'Remote', 'ashby'),
-      title: job.title,
-      company: companyName,
-      location: job.locationName ?? (job.isRemote ? 'Remote' : 'Not specified'),
-      description: (job.descriptionHtml ?? '').replace(/<[^>]+>/g, '').slice(0, 500),
-      applyUrl: job.jobUrl,
-      postedAt: new Date(job.publishedDate),
-      source: 'ashby' as const,
-      isRemote: job.isRemote,
-      employmentType: job.employmentType ?? undefined,
-    }));
+    return postings
+      .filter(job =>
+        job.title.toLowerCase().includes(queryLower) ||
+        (job.descriptionHtml ?? '').toLowerCase().includes(queryLower)
+      )
+      .map(job => ({
+        id: generateJobId(job.title, orgSlug, job.locationName ?? 'Remote', 'ashby'),
+        title: job.title,
+        company: companyName,
+        location: job.locationName ?? (job.isRemote ? 'Remote' : 'Not specified'),
+        description: (job.descriptionHtml ?? '').replace(/<[^>]+>/g, '').slice(0, 500),
+        applyUrl: job.jobUrl,
+        postedAt: new Date(job.publishedDate),
+        source: 'ashby' as const,
+        isRemote: job.isRemote,
+        employmentType: job.employmentType ?? undefined,
+      }));
+  } catch {
+    return [];
+  }
 }

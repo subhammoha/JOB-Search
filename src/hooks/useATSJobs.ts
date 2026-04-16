@@ -1,9 +1,11 @@
 'use client';
 
+import { useMemo } from 'react';
 import { useQueries } from '@tanstack/react-query';
 import { UnifiedJob } from '@/types/job';
 import { fetchGreenhouseCompany, fetchLeverCompany, fetchAshbyCompany } from '@/lib/ats-fetchers';
-import atsCompanies from '@/data/ats-companies.json';
+import { parseATSSlugs, mergeATSTargets, ATSTarget } from '@/lib/ats-url-parser';
+import atsCompaniesData from '@/data/ats-companies.json';
 
 interface ATSCompanies {
   greenhouse: string[];
@@ -11,7 +13,23 @@ interface ATSCompanies {
   ashby: string[];
 }
 
-const ats = atsCompanies as ATSCompanies;
+const atsCompanies = atsCompaniesData as ATSCompanies;
+
+// Seed list — always queried regardless of server results
+const SEED_TARGETS: ATSTarget[] = [
+  ...atsCompanies.greenhouse.map(slug => ({ ats: 'greenhouse' as const, slug })),
+  ...atsCompanies.lever.map(slug => ({ ats: 'lever' as const, slug })),
+  ...atsCompanies.ashby.map(slug => ({ ats: 'ashby' as const, slug })),
+];
+
+function fetchATSCompany(ats: string, slug: string, query: string): Promise<UnifiedJob[]> {
+  switch (ats) {
+    case 'greenhouse': return fetchGreenhouseCompany(slug, query);
+    case 'lever': return fetchLeverCompany(slug, query);
+    case 'ashby': return fetchAshbyCompany(slug, query);
+    default: return Promise.resolve([]);
+  }
+}
 
 export interface UseATSJobsResult {
   jobs: UnifiedJob[];
@@ -20,49 +38,49 @@ export interface UseATSJobsResult {
   totalCount: number;
 }
 
-export function useATSJobs(query: string, enabled: boolean): UseATSJobsResult {
-  const queries = [
-    ...ats.greenhouse.map(company => ({
-      queryKey: ['ats', 'greenhouse', company, query],
-      queryFn: () => fetchGreenhouseCompany(company, query),
-      enabled: enabled && !!query,
-      staleTime: 5 * 60 * 1000,
-      retry: false,
-    })),
-    ...ats.lever.map(company => ({
-      queryKey: ['ats', 'lever', company, query],
-      queryFn: () => fetchLeverCompany(company, query),
-      enabled: enabled && !!query,
-      staleTime: 5 * 60 * 1000,
-      retry: false,
-    })),
-    ...ats.ashby.map(company => ({
-      queryKey: ['ats', 'ashby', company, query],
-      queryFn: () => fetchAshbyCompany(company, query),
-      enabled: enabled && !!query,
-      staleTime: 5 * 60 * 1000,
-      retry: false,
-    })),
-  ];
+/**
+ * Fetches jobs from Greenhouse, Lever, and Ashby directly in the browser.
+ * - Queries all seed companies from ats-companies.json
+ * - Auto-discovers additional company slugs from server job apply URLs
+ * - Results stream in progressively as each company responds
+ * - Browser HTTP connection pooling throttles naturally (no server timeout)
+ */
+export function useATSJobs(query: string, serverJobs: UnifiedJob[], enabled: boolean): UseATSJobsResult {
+  // Discover ATS company slugs from job board result URLs
+  const discovered = useMemo(() => parseATSSlugs(serverJobs), [serverJobs]);
 
-  const results = useQueries({ queries });
+  // Merge seed + discovered, deduplicated by ats+slug
+  const targets = useMemo(() => mergeATSTargets(SEED_TARGETS, discovered), [discovered]);
 
-  const jobs: UnifiedJob[] = [];
+  const results = useQueries({
+    queries: targets.map(t => ({
+      queryKey: ['ats', t.ats, t.slug, query],
+      queryFn: () => fetchATSCompany(t.ats, t.slug, query),
+      enabled: enabled && !!query,
+      staleTime: 5 * 60 * 1000,
+      retry: false,
+    })),
+  });
+
+  const jobs = useMemo<UnifiedJob[]>(() => {
+    const all: UnifiedJob[] = [];
+    for (const r of results) {
+      if (r.status === 'success' && r.data) {
+        all.push(...r.data);
+      }
+    }
+    return all;
+  }, [results]);
+
   let pendingCount = 0;
-
-  for (const result of results) {
-    if (result.status === 'success' && result.data) {
-      jobs.push(...result.data);
-    }
-    if (result.isPending || result.isFetching) {
-      pendingCount++;
-    }
+  for (const r of results) {
+    if (r.isPending || r.isFetching) pendingCount++;
   }
 
   return {
     jobs,
     isLoading: pendingCount > 0,
     pendingCount,
-    totalCount: queries.length,
+    totalCount: targets.length,
   };
 }
